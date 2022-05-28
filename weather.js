@@ -20,17 +20,17 @@ const apiKey = process.env.WEATHER_APP_API;
 program
     .name("Weather App V2")
     .description("The best weather app!")
-    .version("1.0.1");
+    .version("1.0.1")
+    .option(
+        "-s, --scale <string>",
+        "choose c for celsius or f for fahrenheit (you can also k for kelvin if you know what you doing.)",
+        "c" //default value
+    );
 
 program
     .command("get-temp")
     .description("Get the temperature by city name.")
     .argument("<string>", "city name")
-    .option(
-        "-s, --scale <string>",
-        "choose c for celsius or f for fahrenheit (you can also k for kelvin if you know what you doing.)",
-        "c" //default value
-    )
     .action((city, options) => {
         const units = setUnitsForDegree(options.scale);
         getTempByCityName(city, apiKey, units, options.scale);
@@ -42,11 +42,6 @@ program
         "Get more them just a temperature, get a detailed weather forecast."
     )
     .argument("<string>", "city name")
-    .option(
-        "-s, --scale <string>",
-        "choose c for celsius or f for fahrenheit (you can also k for kelvin if you know what you doing.)",
-        "c" //default value
-    )
     .action((city, options) => {
         const unitsInfo = setUnitsForDegree(options.scale);
         getDetailedForecastByCityName(city, apiKey, unitsInfo, options.scale);
