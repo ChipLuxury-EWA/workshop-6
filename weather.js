@@ -19,33 +19,81 @@ const apiKey = process.env.WEATHER_APP_API;
 
 program
     .name("Weather App V2")
-    .description("The best weather app")
+    .description("The best weather app!")
     .version("1.0.1");
 
 program
     .command("get-temp")
-    .description("Get the temp by city name")
+    .description("Get the temperature by city name.")
     .argument("<string>", "city name")
-    .option("-s, --scale <string>", "choose c for celsius or f for fernehit", "c")
+    .option(
+        "-s, --scale <string>",
+        "choose c for celsius or f for fahrenheit (you can also k for kelvin if you know what you doing.)",
+        "c" //default value
+    )
     .action((city, options) => {
-      let units = "metric"
-      if(options.scale === "f") {
-        units = ""
-      }
-      getTempByCityName(city, apiKey, units)
-
+        let units = "metric";
+        if (options.scale === "f") {
+            units = "imperial";
+        } else if (options.scale === "k") {
+            units = "standard";
+        }
+        getTempByCityName(city, apiKey, units, options.scale);
     });
 
-const getTempByCityName = async (cityName, apiKey, units) => {
+program
+    .command("get-detailed-forecast")
+    .description(
+        "Get more them just a temperature, get a detailed weather forecast."
+    )
+    .argument("<string>", "city name")
+    .option(
+        "-s, --scale <string>",
+        "choose c for celsius or f for fahrenheit (you can also k for kelvin if you know what you doing.)",
+        "c" //default value
+    )
+    .action((city, options) => {
+        let units = "metric";
+        if (options.scale === "f") {
+            units = "imperial";
+        } else if (options.scale === "k") {
+            units = "standard";
+        }
+        getDetailedForecastByCityName(city, apiKey, units, options.scale);
+    });
+
+const getTempByCityName = async (cityName, apiKey, units, unitsSymbol) => {
     const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units}`;
     const response = await fetch(URL);
     if (response.status === 200) {
-      const ans = await response.json()
-      // console.log(ans)
-      console.log(`It's ${ans.main.temp} degrees in ${ans.name}`)
+        const ans = await response.json();
+        // console.log(ans)
+        console.log(
+            `It's ${ans.main.temp}${unitsSymbol} degrees in ${ans.name}`
+        );
     } else {
-      console.log("error fetching data from weather api")
+        console.log("error fetching data from weather api");
     }
 };
+
+const getDetailedForecastByCityName = async (
+    cityName,
+    apiKey,
+    units,
+    unitsSymbol
+) => {
+    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units}`;
+    const response = await fetch(URL);
+    if (response.status === 200) {
+        const ans = await response.json();
+        // console.log(ans)
+        console.log(
+            `Today we will have ${ans.weather[0].description}, temperatures will range from ${ans.main.temp_min}${unitsSymbol} to ${ans.main.temp_max}${unitsSymbol} with a wind speed of ${ans.wind.speed}`
+        );
+    } else {
+        console.log("error fetching data from weather api");
+    }
+};
+
 
 program.parse();
