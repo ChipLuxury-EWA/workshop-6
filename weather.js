@@ -32,12 +32,7 @@ program
         "c" //default value
     )
     .action((city, options) => {
-        let units = "metric";
-        if (options.scale === "f") {
-            units = "imperial";
-        } else if (options.scale === "k") {
-            units = "standard";
-        }
+        const units = setUnitsForDegree(options.scale);
         getTempByCityName(city, apiKey, units, options.scale);
     });
 
@@ -53,47 +48,48 @@ program
         "c" //default value
     )
     .action((city, options) => {
-        let units = "metric";
-        if (options.scale === "f") {
-            units = "imperial";
-        } else if (options.scale === "k") {
-            units = "standard";
-        }
-        getDetailedForecastByCityName(city, apiKey, units, options.scale);
+        const unitsInfo = setUnitsForDegree(options.scale);
+        getDetailedForecastByCityName(city, apiKey, unitsInfo, options.scale);
     });
 
-const getTempByCityName = async (cityName, apiKey, units, unitsSymbol) => {
-    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units}`;
+const getTempByCityName = async (cityName, apiKey, units) => {
+    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units.units}`;
     const response = await fetch(URL);
     if (response.status === 200) {
         const ans = await response.json();
         // console.log(ans)
         console.log(
-            `It's ${ans.main.temp}${unitsSymbol} degrees in ${ans.name}`
+            `It's ${ans.main.temp}${units.baseUnit} degrees in ${ans.name}`
         );
     } else {
         console.log("error fetching data from weather api");
     }
 };
 
-const getDetailedForecastByCityName = async (
-    cityName,
-    apiKey,
-    units,
-    unitsSymbol
-) => {
-    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units}`;
+const getDetailedForecastByCityName = async (cityName, apiKey, units) => {
+    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units.units}`;
     const response = await fetch(URL);
     if (response.status === 200) {
         const ans = await response.json();
         // console.log(ans)
         console.log(
-            `Today we will have ${ans.weather[0].description}, temperatures will range from ${ans.main.temp_min}${unitsSymbol} to ${ans.main.temp_max}${unitsSymbol} with a wind speed of ${ans.wind.speed}`
+            `Today we will have ${ans.weather[0].description}, temperatures will range from ${ans.main.temp_min}${units.baseUnit} to ${ans.main.temp_max}${units.baseUnit} with a wind speed of ${ans.wind.speed} ${units.windSpeedUnits}`
         );
     } else {
         console.log("error fetching data from weather api");
     }
 };
 
+const setUnitsForDegree = (baseUnit) => {
+    let units = "metric";
+    let windSpeedUnits = "meter/sec";
+    if (baseUnit === "f") {
+        units = "imperial";
+        windSpeedUnits = "miles/hour";
+    } else if (baseUnit === "k") {
+        units = "standard";
+    }
+    return { units, baseUnit, windSpeedUnits };
+};
 
 program.parse();
