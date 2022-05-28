@@ -50,31 +50,32 @@ program
     });
 
 const getTempByCityName = async (cityName, apiKey, units) => {
-    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units.units}`;
-    const response = await fetch(URL);
-    if (response.status === 200) {
-        const ans = await response.json();
-        // console.log(ans)
+    const ans = await fetchWeatherAndParseToJson(cityName, apiKey, units);
+    if (ans.cod === 200) {
         console.log(
             `It's ${ans.main.temp}${units.baseUnit} degrees in ${ans.name}`
         );
     } else {
-        console.log("error fetching data from weather api");
+        console.log("error fetching data from weather api", ans.cod, ans.message);
     }
 };
 
 const getDetailedForecastByCityName = async (cityName, apiKey, units) => {
-    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units.units}`;
-    const response = await fetch(URL);
+    const response = await fetchWeatherAndParseToJson(cityName, apiKey, units);
     if (response.status === 200) {
         const ans = await response.json();
-        // console.log(ans)
         console.log(
             `Today we will have ${ans.weather[0].description}, temperatures will range from ${ans.main.temp_min}${units.baseUnit} to ${ans.main.temp_max}${units.baseUnit} with a wind speed of ${ans.wind.speed} ${units.windSpeedUnits}`
         );
     } else {
         console.log("error fetching data from weather api");
     }
+};
+
+const fetchWeatherAndParseToJson = async (cityName, apiKey, units) => {
+    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units.units}`;
+    const response = await fetch(URL);
+    return await response.json();
 };
 
 const setUnitsForDegree = (baseUnit) => {
