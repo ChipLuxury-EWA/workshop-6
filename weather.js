@@ -17,6 +17,8 @@ const program = new Command();
 dotenv.config();
 const apiKey = process.env.WEATHER_APP_API;
 
+const globalOptionsRedirectMessage = "check main help (-h) for base units options"
+
 program
     .name("Weather App V2")
     .description("The best weather app!")
@@ -31,6 +33,7 @@ program
     .command("get-temp")
     .description("Get the temperature by city name.")
     .argument("<string>", "city name")
+    .option(globalOptionsRedirectMessage)
     .action((city, options) => {
         const units = setUnitsForDegree(options.scale);
         getTempByCityName(city, apiKey, units, options.scale);
@@ -39,9 +42,10 @@ program
 program
     .command("get-detailed-forecast")
     .description(
-        "Get more them just a temperature, get a detailed weather forecast."
+        "Get more then just a temperature, get a detailed weather forecast!"
     )
     .argument("<string>", "city name")
+    .option(globalOptionsRedirectMessage)
     .action((city, options) => {
         const unitsInfo = setUnitsForDegree(options.scale);
         getDetailedForecastByCityName(city, apiKey, unitsInfo, options.scale);
