@@ -9,27 +9,43 @@
 // 8. BONUS - Implement the second command.
 
 // Commander usage example for your reference:
-import chalk from "chalk";
 import { Command } from "commander";
+import dotenv from "dotenv";
+import fetch from "node-fetch";
+
 const program = new Command();
+dotenv.config();
+const apiKey = process.env.WEATHER_APP_API;
 
 program
-  .name("cli-calc")
-  .description("The best CLI calculator")
-  .version("1.0.0");
+    .name("Weather App V2")
+    .description("The best weather app")
+    .version("1.0.1");
 
 program
-  .command("add")
-  .description("Add two numbers")
-  .argument("<number>", "first operand")
-  .argument("<number>", "second operand")
-  .option("-c, --color <string>", "Result color", "white")
-  .action((firstNumber, secondNumber, options) => {
-    console.log(
-      chalk[options.color](
-        `Result: ${Number(firstNumber) + Number(secondNumber)}`
-      )
-    );
-  });
+    .command("get-temp")
+    .description("Get the temp by city name")
+    .argument("<string>", "city name")
+    .option("-s, --scale <string>", "choose c for celsius or f for fernehit", "c")
+    .action((city, options) => {
+      let units = "metric"
+      if(options.scale === "f") {
+        units = ""
+      }
+      getTempByCityName(city, apiKey, units)
+
+    });
+
+const getTempByCityName = async (cityName, apiKey, units) => {
+    const URL = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&APPID=${apiKey}&units=${units}`;
+    const response = await fetch(URL);
+    if (response.status === 200) {
+      const ans = await response.json()
+      // console.log(ans)
+      console.log(`It's ${ans.main.temp} degrees in ${ans.name}`)
+    } else {
+      console.log("error fetching data from weather api")
+    }
+};
 
 program.parse();
