@@ -1,14 +1,4 @@
-// Recommended order for your solution:
-// 1. Install the dotenv package.
-// 2. Add a dotenv file, put the API key in dotenv and print it.
-// 3. Install the node-fetch package.
-// 4. Create a method that calls the API to get temperature using node-fetch.
-// 5. Install the commander package.
-// 6. Create a basic commander skeleton without the actions implementation (just the metadata and commands configuration).
-// 7. Implement the first command, including the optional arguments.
-// 8. BONUS - Implement the second command.
-
-// Commander usage example for your reference:
+import { myLogger } from "mondayu-logger-tom-portugez";
 import { Command } from "commander";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
@@ -20,7 +10,7 @@ const apiKey = process.env.WEATHER_APP_API;
 program
     .name("Weather App V2")
     .description("The best weather app!")
-    .version("1.0.1")
+    .version("2.2.0")
     .option(
         "-s, --scale <string>",
         "choose c for celsius or f for fahrenheit (you can also k for kelvin if you know what you doing.)",
@@ -51,30 +41,37 @@ program
 
 const getTempByCityName = async (cityName, apiKey, units) => {
     const ans = await fetchWeatherAndParseToJson(cityName, apiKey, units);
-    handleWeatherJsonAns(ans) &&
-        console.log(
-            `It's ${ans.main.temp}${units.baseUnit} degrees in ${ans.name}`
-        );
+    if (handleWeatherJsonAns(ans)) {
+        const message = `It's ${ans.main.temp}${units.baseUnit} degrees in ${ans.name}`;
+        handleMessage(message);
+    }
 };
 
 const getDetailedForecastByCityName = async (cityName, apiKey, units) => {
     const ans = await fetchWeatherAndParseToJson(cityName, apiKey, units);
-    handleWeatherJsonAns(ans) &&
-        console.log(
-            `Today we will have ${ans.weather[0].description}, temperatures will range from ${ans.main.temp_min}${units.baseUnit} to ${ans.main.temp_max}${units.baseUnit} with a wind speed of ${ans.wind.speed} ${units.windSpeedUnits}`
-        );
+    if (handleWeatherJsonAns(ans)) {
+        const message = `Today we will have ${ans.weather[0].description}, temperatures will range from ${ans.main.temp_min}${units.baseUnit} to ${ans.main.temp_max}${units.baseUnit} with a wind speed of ${ans.wind.speed} ${units.windSpeedUnits}`;
+        handleMessage(message);
+    }
+};
+
+const handleMessage = (message) => {
+    myLogger.log(message);
+    console.log(message);
+};
+
+const handleErrorMessage = (message) => {
+    myLogger.error(message);
+    console.log(message);
 };
 
 const handleWeatherJsonAns = (answer) => {
     if (answer.cod !== 200) {
-        console.log(
-            "error fetching data from weather api",
-            answer.cod,
-            answer.message
-        );
-        return false
+        const message = `error fetching data from weather api ${answer.cod} ${answer.message}`;
+        handleErrorMessage(message)
+        return false;
     } else {
-      return true
+        return true;
     }
 };
 
