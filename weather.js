@@ -6,6 +6,10 @@ import fetch from "node-fetch";
 const program = new Command();
 dotenv.config();
 const apiKey = process.env.WEATHER_APP_API;
+const commonOptionsMessage =
+    "\nCommon Options:\n-s, --scale <string>\
+    \tchoose c for celsius or f for fahrenheit (you can also k for kelvin if you know what you doing.)\
+    (default: 'c')\n";
 
 program
     .name("Weather App V2")
@@ -17,12 +21,11 @@ program
         "c" //default value
     );
 
-program.parse(); //this line insert the help from 'name' to 'command'
-
 program
     .command("get-temp")
     .description("Get the temperature by city name.")
     .argument("<string>", "city name")
+    .option(commonOptionsMessage)
     .action((city) => {
         const units = setUnitsForDegree(program.opts().scale);
         getTempByCityName(city, apiKey, units);
@@ -34,6 +37,7 @@ program
         "Get more then just a temperature, get a detailed weather forecast!"
     )
     .argument("<string>", "city name")
+    .option(commonOptionsMessage)
     .action((city) => {
         const unitsInfo = setUnitsForDegree(program.opts().scale);
         getDetailedForecastByCityName(city, apiKey, unitsInfo);
@@ -68,7 +72,7 @@ const handleErrorMessage = (message) => {
 const handleWeatherJsonAns = (answer) => {
     if (answer.cod !== 200) {
         const message = `error fetching data from weather api ${answer.cod} ${answer.message}`;
-        handleErrorMessage(message)
+        handleErrorMessage(message);
         return false;
     } else {
         return true;
@@ -93,4 +97,4 @@ const setUnitsForDegree = (baseUnit) => {
     return { units, baseUnit, windSpeedUnits };
 };
 
-program.parse();
+program.parse(process.argv);
